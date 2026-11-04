@@ -15,10 +15,10 @@ import sys
 
 def main() -> int:
     # API key: prefer explicit arg, else env var, else a dev default
+    keys = os.environ.get("GROUNDNUT_API_KEYS", "")
     if len(sys.argv) > 1:
         key = sys.argv[1]
     else:
-        keys = os.environ.get("GROUNDNUT_API_KEYS", "")
         key = keys.split(",")[0].strip() if keys.strip() else "dev-local-key"
 
     os.environ["GROUNDNUT_API_KEY"] = key
