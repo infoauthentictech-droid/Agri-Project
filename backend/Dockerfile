@@ -33,6 +33,9 @@ RUN pip install --no-cache-dir torch torchvision --index-url https://download.py
 COPY backend/app ./app
 COPY backend/run_server.py ./
 
+# Copy ml package (needed by classifier_service.py)
+COPY ml ./ml
+
 # Copy model weights (kept small; tracked in git via !*.pt un-ignore)
 COPY *.pt ./
 
