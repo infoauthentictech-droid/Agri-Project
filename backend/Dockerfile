@@ -10,11 +10,11 @@ FROM python:3.11-slim
 WORKDIR /app
 
 # System dependencies (needed by opencv-python-headless, pillow, numpy)
-# libgl1-mesa-glx removed: not available in Debian Trixie; not needed with opencv-python-headless
-# libxcb1 needed by cv2 (opencv) at runtime
+# libgl1 + libxcb1 needed by cv2 (opencv) at runtime
 RUN apt-get update && apt-get install -y --no-install-recommends \
     gcc \
     g++ \
+    libgl1 \
     libglib2.0-0 \
     libxcb1 \
     && rm -rf /var/lib/apt/lists/*
