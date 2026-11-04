@@ -29,6 +29,7 @@ RUN pip install --no-cache-dir torch torchvision --index-url https://download.py
 
 # Copy backend source
 COPY backend/app ./app
+COPY backend/run_server.py ./
 
 # Copy model weights (kept small; tracked in git via !*.pt un-ignore)
 COPY *.pt ./
