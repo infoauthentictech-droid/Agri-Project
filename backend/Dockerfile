@@ -11,10 +11,12 @@ WORKDIR /app
 
 # System dependencies (needed by opencv-python-headless, pillow, numpy)
 # libgl1-mesa-glx removed: not available in Debian Trixie; not needed with opencv-python-headless
+# libxcb1 needed by cv2 (opencv) at runtime
 RUN apt-get update && apt-get install -y --no-install-recommends \
     gcc \
     g++ \
     libglib2.0-0 \
+    libxcb1 \
     && rm -rf /var/lib/apt/lists/*
 
 # Upgrade pip
