@@ -36,6 +36,9 @@ COPY backend/run_server.py ./
 # Copy ml package (needed by classifier_service.py)
 COPY ml ./ml
 
+# Copy herbicide package (needed by recommendation_service.py)
+COPY herbicide ./herbicide
+
 # Copy model weights (kept small; tracked in git via !*.pt un-ignore)
 COPY *.pt ./
 
