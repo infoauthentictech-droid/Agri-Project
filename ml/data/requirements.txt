@@ -1,0 +1,5 @@
+# Groundnut AI preprocessing pipeline — runtime dependencies.
+# Only libraries actually used by ml/data are listed. Training libraries
+# (torch, ultralytics) will be added later in a dedicated training venv.
+pillow>=10.0
+numpy>=1.24

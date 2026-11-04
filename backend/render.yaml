@@ -1,0 +1,27 @@
+# =============================================================================
+# Render Blueprint — Groundnut AI Backend
+# =============================================================================
+# Create a "Web Service" on Render and connect this repo, or import this file
+# directly at https://dashboard.render.com/blueprints
+# =============================================================================
+
+services:
+  - type: web
+    name: groundnut-ai-backend
+    env: docker
+    plan: free
+    region: oregon        # change to your preferred region
+    dockerContext: ./backend
+    dockerfilePath: Dockerfile
+    autoDeploy: true
+    envVars:
+      - key: GROUNDNUT_API_KEYS
+        sync: false       # set this manually in the Render dashboard (secret)
+      - key: GROUNDNUT_PRELOAD_MODELS
+        value: "1"
+      - key: GROUNDNUT_DISABLE_DOCS
+        value: "0"
+      - key: PORT
+        value: "8000"
+    healthCheckPath: /healthz
+    # Render provides $PORT automatically; the Dockerfile CMD reads it.

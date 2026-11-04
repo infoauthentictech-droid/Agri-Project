@@ -1,0 +1,14 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!-- DEBUG-ONLY network-security policy (this file is part of the debug source
+     set and is merged ONLY into debug builds; profile builds get their own).
+
+     Cleartext HTTP is allowed broadly so any LAN IP / emulator address used by
+     run_project.ps1 or the dart-define flag works without editing this file. Release
+     builds use the strict policy in src/main and never see this file. -->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="true">
+        <trust-anchors>
+            <certificates src="system" />
+        </trust-anchors>
+    </base-config>
+</network-security-config>

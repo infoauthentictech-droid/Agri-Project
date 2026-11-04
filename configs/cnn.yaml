@@ -1,0 +1,35 @@
+# CNN experiment configuration — groundnut vs weed classification.
+# The original custom architecture (renamed CustomCNN -> CNN; the old
+# configs/custom_cnn.yaml remains as a deprecated alias).
+# Derived classification set: datasets/processed/classification_peanut
+
+experiment_name: cnn
+seed: 42
+
+dataset:
+  root: datasets/processed/classification_groundnut_weed
+  image_size: 128
+  augmentation: mosaic_mixup
+
+model:
+  name: cnn
+  num_classes: 2
+  input_channels: 3
+  base_channels: [32, 64, 128, 256]
+  dropout: 0.25
+
+training:
+  epochs: 30
+  batch_size: 32
+  optimizer: adamw
+  learning_rate: 0.001
+  weight_decay: 0.0001
+  lr_step_epochs: 10
+  lr_gamma: 0.5
+  early_stop_patience: 8
+  num_workers: 2
+
+evaluation:
+  batch_size: 64
+
+output_dir: experiments/cnn

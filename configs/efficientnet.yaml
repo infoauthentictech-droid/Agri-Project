@@ -1,0 +1,31 @@
+# EfficientNet-B0 (ImageNet pretrained) — standardized benchmark config.
+# image_size 128 for all models: identical input resolution across the benchmark.
+experiment_name: efficientnet
+seed: 42
+
+dataset:
+  root: datasets/processed/classification_groundnut_weed
+  image_size: 128
+  augmentation: mosaic_mixup
+
+model:
+  name: efficientnet
+  weights: imagenet
+  num_classes: 2
+  freeze_backbone: false
+
+training:
+  epochs: 30
+  batch_size: 32
+  optimizer: adamw
+  learning_rate: 0.0005
+  weight_decay: 0.0001
+  lr_step_epochs: 10
+  lr_gamma: 0.5
+  early_stop_patience: 8
+  num_workers: 2
+
+evaluation:
+  batch_size: 32
+
+output_dir: experiments/efficientnet

@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Crop and Weed Labelling</title>
+<style>
+  :root {
+    color-scheme: light dark;
+    --bg: #f6f7f5; --panel: #ffffff; --text: #1d221c; --muted: #5d665a; --line: #d6dad3;
+    --crop: #15803d; --weed: #dc2626; --none: #e2b203; --accent: #1d4ed8;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #161a16; --panel: #20251f; --text: #e8ebe6; --muted: #a1aa9d; --line: #39403a;
+            --crop: #4ade80; --weed: #f87171; --none: #facc15; --accent: #93c5fd; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 14px/1.4 system-ui, sans-serif; }
+  header { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; padding: 8px 12px;
+           background: var(--panel); border-bottom: 1px solid var(--line); position: sticky; top: 0; z-index: 2; }
+  h1 { font-size: 15px; margin: 0 8px 0 0; }
+  button { font: inherit; padding: 6px 10px; border: 1px solid var(--line); border-radius: 6px;
+           background: var(--panel); color: var(--text); cursor: pointer; }
+  button:hover { border-color: var(--accent); }
+  button:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+  button.active { background: var(--brush); color: #fff; border-color: var(--brush); font-weight: 600; }
+  button.primary { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; }
+  @media (prefers-color-scheme: dark) { button.primary, button.active { color: #111; } }
+  kbd { font: 11px ui-monospace, monospace; opacity: .75; margin-left: 3px; }
+  .group { display: flex; gap: 4px; align-items: center; }
+  .spacer { flex: 1; }
+  #status { color: var(--muted); min-height: 20px; padding: 4px 12px; }
+  #status.error { color: var(--weed); font-weight: 600; }
+  main { padding: 0 12px 16px; display: flex; justify-content: center; }
+  #stage { position: relative; line-height: 0; }
+  #photo { max-width: 100%; max-height: calc(100vh - 118px); display: block; user-select: none; }
+  svg { position: absolute; inset: 0; width: 100%; height: 100%; cursor: crosshair; }
+  polygon { stroke-width: 2.5; vector-effect: non-scaling-stroke; cursor: pointer; }
+  polygon.none { stroke: var(--none); fill: rgba(250, 204, 21, .12); }
+  polygon.crop { stroke: var(--crop); fill: rgba(21, 128, 61, .35); }
+  polygon.weed { stroke: var(--weed); fill: rgba(220, 38, 38, .35); }
+  polygon:hover { stroke-width: 4; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Crop and Weed Labelling</h1>
+  <div class="group" role="group" aria-label="Class to apply">
+    <button id="brush0" style="--brush: var(--crop)">Groundnut<kbd>1</kbd></button>
+    <button id="brush1" style="--brush: var(--weed)">Weed<kbd>2</kbd></button>
+  </div>
+  <button id="rest">Mark the rest<kbd>A</kbd></button>
+  <button id="undo">Undo<kbd>Z</kbd></button>
+  <div class="spacer"></div>
+  <span id="progress"></span>
+  <button id="next-open">Next unlabelled</button>
+  <div class="group">
+    <button id="prev" aria-label="Previous image">Prev<kbd>←</kbd></button>
+    <button id="next" aria-label="Next image without saving">Next<kbd>→</kbd></button>
+  </div>
+  <button id="save" class="primary">Save and next<kbd>S</kbd></button>
+</header>
+<div id="status" role="status" aria-live="polite"></div>
+<main>
+  <div id="stage">
+    <img id="photo" alt="Field photo to label" draggable="false">
+    <svg id="overlay" viewBox="0 0 1 1" preserveAspectRatio="none"></svg>
+  </div>
+</main>
+<script>
+const $ = (id) => document.getElementById(id);
+const CLASS_CSS = { 0: "crop", 1: "weed" };
+const SVG_NS = "http://www.w3.org/2000/svg";
+let images = [], current = 0, objects = [], brush = 1, history = [], busy = false;
+
+function setStatus(text, isError = false) {
+  $("status").textContent = text;
+  $("status").classList.toggle("error", isError);
+}
+
+async function api(path, options) {
+  const response = await fetch(path, options);
+  const data = await response.json();
+  if (!response.ok) throw new Error(data.error || response.statusText);
+  return data;
+}
+
+function remember() { history.push(JSON.stringify(objects)); }
+
+function draw() {
+  const overlay = $("overlay");
+  overlay.replaceChildren();
+  objects.forEach((obj, index) => {
+    for (const flat of obj.polygons) {
+      const poly = document.createElementNS(SVG_NS, "polygon");
+      const points = [];
+      for (let i = 0; i < flat.length; i += 2) points.push(flat[i] + "," + flat[i + 1]);
+      poly.setAttribute("points", points.join(" "));
+      poly.setAttribute("class", obj.cls === null ? "none" : CLASS_CSS[obj.cls]);
+      poly.addEventListener("click", (event) => { event.stopPropagation(); paint(index); });
+      poly.addEventListener("contextmenu", (event) => { event.preventDefault(); remove(index); });
+      overlay.appendChild(poly);
+    }
+  });
+  const open = objects.filter((o) => o.cls === null).length;
+  const crop = objects.filter((o) => o.cls === 0).length;
+  const weed = objects.filter((o) => o.cls === 1).length;
+  const doneCount = images.filter((i) => i.done).length;
+  $("progress").textContent = `Image ${current + 1} of ${images.length} · ${doneCount} labelled`;
+  setStatus(`${images[current].folder}/${images[current].name}: ${crop} groundnut, ${weed} weed, `
+    + `${open} not marked (not saved). Click an outline to mark it, click a plant with no outline to add one, right-click to delete.`);
+}
+
+function paint(index) {
+  remember();
+  objects[index].cls = objects[index].cls === brush ? null : brush;
+  draw();
+}
+
+function remove(index) {
+  remember();
+  objects.splice(index, 1);
+  draw();
+}
+
+function setBrush(value) {
+  brush = value;
+  $("brush0").classList.toggle("active", value === 0);
+  $("brush1").classList.toggle("active", value === 1);
+}
+
+async function load(index) {
+  if (index < 0 || index >= images.length) return;
+  current = index;
+  history = [];
+  objects = [];
+  $("overlay").replaceChildren();
+  setStatus("Loading…");
+  $("photo").src = `/image/${index}`;
+  try {
+    objects = (await api(`/api/objects/${index}`)).objects;
+    draw();
+  } catch (error) { setStatus(`Could not load this image: ${error.message}`, true); }
+}
+
+async function saveAndNext() {
+  if (busy) return;
+  busy = true;
+  try {
+    const marked = objects.filter((o) => o.cls !== null);
+    await api(`/api/save/${current}`, { method: "POST", body: JSON.stringify({ objects: marked }) });
+    images[current].done = true;
+    const next = images.findIndex((img, i) => i > current && !img.done);
+    if (next >= 0) await load(next);
+    else { draw(); setStatus("Saved. Every image after this one is already labelled."); }
+  } catch (error) { setStatus(`Not saved: ${error.message}`, true); }
+  busy = false;
+}
+
+$("overlay").addEventListener("click", async (event) => {
+  if (busy) return;
+  const box = $("overlay").getBoundingClientRect();
+  const x = (event.clientX - box.left) / box.width, y = (event.clientY - box.top) / box.height;
+  busy = true;
+  setStatus("Outlining this plant…");
+  try {
+    const { polygons } = await api(`/api/segment/${current}`, { method: "POST", body: JSON.stringify({ x, y }) });
+    if (polygons.length) { remember(); objects.push({ cls: brush, polygons }); draw(); }
+    else setStatus("No plant found at that spot. Try clicking on a leaf.", true);
+  } catch (error) { setStatus(`Could not outline: ${error.message}`, true); }
+  busy = false;
+});
+
+$("brush0").onclick = () => setBrush(0);
+$("brush1").onclick = () => setBrush(1);
+$("rest").onclick = () => { remember(); objects.forEach((o) => { if (o.cls === null) o.cls = brush; }); draw(); };
+$("undo").onclick = () => { if (history.length) { objects = JSON.parse(history.pop()); draw(); } };
+$("prev").onclick = () => load(current - 1);
+$("next").onclick = () => load(current + 1);
+$("save").onclick = saveAndNext;
+$("next-open").onclick = () => {
+  const next = images.findIndex((img, i) => i > current && !img.done);
+  load(next >= 0 ? next : images.findIndex((img) => !img.done));
+};
+
+document.addEventListener("keydown", (event) => {
+  if (event.ctrlKey || event.metaKey || event.altKey) return;
+  const actions = { "1": () => setBrush(0), "2": () => setBrush(1), a: () => $("rest").click(), z: () => $("undo").click(),
+                    s: saveAndNext, ArrowLeft: () => load(current - 1), ArrowRight: () => load(current + 1) };
+  const action = actions[event.key.length === 1 ? event.key.toLowerCase() : event.key];
+  if (action) { event.preventDefault(); action(); }
+});
+
+(async () => {
+  setBrush(1);
+  try {
+    images = await api("/api/images");
+    const first = images.findIndex((img) => !img.done);
+    await load(first >= 0 ? first : 0);
+  } catch (error) { setStatus(`Could not start: ${error.message}`, true); }
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,5 @@
+# Groundnut AI augmentation pipeline — runtime dependencies.
+# Self-contained (numpy + Pillow only) for deterministic, seed-reproducible
+# image augmentation with synchronized masks/boxes.
+numpy>=1.24
+pillow>=10.0
