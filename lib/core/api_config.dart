@@ -1,11 +1,6 @@
 import 'package:flutter/foundation.dart';
 
-enum Environment {
-  local,
-  emulator,
-  device,
-  production,
-}
+enum Environment { local, emulator, device, production }
 
 class ApiConfig {
   // Environment configuration
@@ -81,7 +76,9 @@ class ApiConfig {
   static bool isValidUrl(String url) {
     try {
       final uri = Uri.parse(url);
-      return uri.hasScheme && (uri.scheme == 'http' || uri.scheme == 'https') && uri.hasAuthority;
+      return uri.hasScheme &&
+          (uri.scheme == 'http' || uri.scheme == 'https') &&
+          uri.hasAuthority;
     } catch (e) {
       return false;
     }

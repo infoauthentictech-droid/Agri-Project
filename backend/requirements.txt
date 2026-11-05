@@ -5,9 +5,14 @@ python-multipart>=0.0.6
 pillow>=10.1.0
 numpy>=1.26.0
 ultralytics>=8.0.200
-opencv-python-headless>=4.8.0
+# torch and torchvision already installed with CUDA
+# torch>=2.5.0
+# torchvision>=0.20.0
+opencv-python>=4.8.0
 matplotlib>=3.8.0
+# Required by the /analyze plant-vs-other gate (backend/app/utils/plant_gate.py
+# loads backend/app/utils/plant_gate_model.joblib). Models from the current training
+# script are XGBoost Random Forests; older ones are scikit-learn.
 scikit-learn>=1.3.2
-xgboost>=1.3.2,<3.3
+xgboost>=3.4.1
 joblib>=1.3.2
-# CPU-only torch/torchvision installed separately from PyTorch CPU index (see Dockerfile)

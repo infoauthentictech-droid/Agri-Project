@@ -1,36 +1,20 @@
-"""Start the Groundnut AI backend.
+"""Start the Groundnut AI backend with an explicit API key.
 
 Usage (from the backend/ directory):
-    python run_server.py [api_key] [port]
+    python run_server.py dev-my-secret-key [port]
 
-If arguments are omitted, values are read from environment variables:
-    GROUNDNUT_API_KEYS   (comma-separated valid keys; first one is used)
-    PORT                 (default 8000)
-
-Render sets PORT automatically; set GROUNDNUT_API_KEYS in the Render dashboard.
+Sets the GROUNDNUT_API_KEY inside this process (before importing the app) so the
+key can never fail to propagate via shell/environment inheritance.
 """
 import os
 import sys
 
 
 def main() -> int:
-    # API key: prefer explicit arg, else env var, else a dev default
-    keys = os.environ.get("GROUNDNUT_API_KEYS", "")
-    if len(sys.argv) > 1:
-        key = sys.argv[1]
-    else:
-        key = keys.split(",")[0].strip() if keys.strip() else "dev-local-key"
+    key = sys.argv[1] if len(sys.argv) > 1 else "dev-local-key"
+    port = int(sys.argv[2]) if len(sys.argv) > 2 else 8000
 
     os.environ["GROUNDNUT_API_KEY"] = key
-    # Also expose the plural form the auth layer reads
-    if keys.strip():
-        os.environ["GROUNDNUT_API_KEYS"] = keys
-
-    # Port: explicit arg, else $PORT (Render), else 8000
-    if len(sys.argv) > 2:
-        port = int(sys.argv[2])
-    else:
-        port = int(os.environ.get("PORT", "8000"))
 
     import uvicorn
 
