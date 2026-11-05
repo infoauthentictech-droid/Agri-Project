@@ -1,0 +1,10 @@
+{
+  "low_threshold": 5.0,
+  "medium_threshold": 15.0,
+  "detection_confidence": 0.25,
+  "nms_iou_threshold": 0.45,
+  "weed_class_id": 1,
+  "min_box_area": 100,
+  "calibrated": false,
+  "note": "Thresholds are NOT field-calibrated. coverage/density must be presented as estimates; the weed_class_id is a configuration assumption until the detector label mapping is confirmed."
+}

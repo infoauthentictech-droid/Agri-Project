@@ -1,0 +1,21 @@
+{
+  "threshold": 0.7249348163604736,
+  "target_max_fnr": 0.005,
+  "target_max_fpr": 0.015,
+  "n_train": 17571,
+  "n_val": 1100,
+  "n_test": 1167,
+  "n_train_positives": 15870,
+  "n_train_negatives": 1701,
+  "validation_fnr": 0.017663043478260868,
+  "validation_fpr": 0.013736263736263736,
+  "test_fnr": 0.0547945205479452,
+  "test_fpr": 0.038461538461538464,
+  "validation_targets_met": false,
+  "test_targets_met": false,
+  "feature_extractor": "resnet50",
+  "n_positives_total": 17409,
+  "n_negatives_total": 2429,
+  "positive_duplicates": 0,
+  "negative_duplicates": 0
+}

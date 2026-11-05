@@ -1,0 +1,176 @@
+{
+  "model": "efficientnet",
+  "dataset_root": "D:\\Flutter\\PHD PROJECT\\Agri Project\\datasets\\hybrid\\classification",
+  "image_size": 128,
+  "epochs_trained": 16,
+  "best_val_accuracy": 99.02,
+  "test_accuracy": 98.75,
+  "test_precision": 0.9876,
+  "test_recall": 0.9875,
+  "test_f1": 0.9875,
+  "training_time_seconds": 1243.17,
+  "model_size_mb": 15.3,
+  "model_parameters": 4010110,
+  "class_metrics": {
+    "crop": {
+      "precision": 0.9944,
+      "recall": 0.9835,
+      "f1-score": 0.9889,
+      "support": 363
+    },
+    "weed": {
+      "precision": 0.9786,
+      "recall": 0.9928,
+      "f1-score": 0.9857,
+      "support": 277
+    }
+  },
+  "history": [
+    {
+      "epoch": 1,
+      "train_loss": 0.1203,
+      "train_acc": 95.65,
+      "val_loss": 0.131,
+      "val_acc": 97.55
+    },
+    {
+      "epoch": 2,
+      "train_loss": 0.0485,
+      "train_acc": 98.35,
+      "val_loss": 0.1042,
+      "val_acc": 95.74
+    },
+    {
+      "epoch": 3,
+      "train_loss": 0.0448,
+      "train_acc": 98.44,
+      "val_loss": 0.168,
+      "val_acc": 96.56
+    },
+    {
+      "epoch": 4,
+      "train_loss": 0.0268,
+      "train_acc": 99.14,
+      "val_loss": 0.1071,
+      "val_acc": 97.71
+    },
+    {
+      "epoch": 5,
+      "train_loss": 0.0242,
+      "train_acc": 99.11,
+      "val_loss": 0.0944,
+      "val_acc": 97.22
+    },
+    {
+      "epoch": 6,
+      "train_loss": 0.0265,
+      "train_acc": 99.07,
+      "val_loss": 0.0966,
+      "val_acc": 98.36
+    },
+    {
+      "epoch": 7,
+      "train_loss": 0.0197,
+      "train_acc": 99.31,
+      "val_loss": 0.085,
+      "val_acc": 99.02
+    },
+    {
+      "epoch": 8,
+      "train_loss": 0.0212,
+      "train_acc": 99.26,
+      "val_loss": 0.26,
+      "val_acc": 97.22
+    },
+    {
+      "epoch": 9,
+      "train_loss": 0.0233,
+      "train_acc": 99.21,
+      "val_loss": 0.1161,
+      "val_acc": 97.55
+    },
+    {
+      "epoch": 10,
+      "train_loss": 0.016,
+      "train_acc": 99.48,
+      "val_loss": 0.0977,
+      "val_acc": 97.87
+    },
+    {
+      "epoch": 11,
+      "train_loss": 0.0142,
+      "train_acc": 99.5,
+      "val_loss": 0.0903,
+      "val_acc": 97.71
+    },
+    {
+      "epoch": 12,
+      "train_loss": 0.0163,
+      "train_acc": 99.44,
+      "val_loss": 0.0756,
+      "val_acc": 97.87
+    },
+    {
+      "epoch": 13,
+      "train_loss": 0.0098,
+      "train_acc": 99.68,
+      "val_loss": 0.0904,
+      "val_acc": 96.89
+    },
+    {
+      "epoch": 14,
+      "train_loss": 0.0105,
+      "train_acc": 99.64,
+      "val_loss": 0.1122,
+      "val_acc": 97.55
+    },
+    {
+      "epoch": 15,
+      "train_loss": 0.0095,
+      "train_acc": 99.69,
+      "val_loss": 0.1118,
+      "val_acc": 98.2
+    },
+    {
+      "epoch": 16,
+      "train_loss": 0.0094,
+      "train_acc": 99.66,
+      "val_loss": 0.0944,
+      "val_acc": 98.04
+    },
+    {
+      "epoch": 17,
+      "train_loss": 0.0068,
+      "train_acc": 99.78,
+      "val_loss": 0.0874,
+      "val_acc": 98.36
+    }
+  ],
+  "classification_report": {
+    "crop": {
+      "precision": 0.9944289693593314,
+      "recall": 0.9834710743801653,
+      "f1-score": 0.9889196675900277,
+      "support": 363.0
+    },
+    "weed": {
+      "precision": 0.9786476868327402,
+      "recall": 0.9927797833935018,
+      "f1-score": 0.985663082437276,
+      "support": 277.0
+    },
+    "accuracy": 0.9875,
+    "macro avg": {
+      "precision": 0.9865383280960358,
+      "recall": 0.9881254288868335,
+      "f1-score": 0.9872913750136518,
+      "support": 640.0
+    },
+    "weighted avg": {
+      "precision": 0.9875986330157911,
+      "recall": 0.9875,
+      "f1-score": 0.9875101768286024,
+      "support": 640.0
+    }
+  }
+}

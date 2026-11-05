@@ -1,16 +1,26 @@
 # =============================================================================
 # Groundnut AI Backend — Dockerfile for Render
 # =============================================================================
-# Build: docker build -t groundnut-ai-backend ./backend
-# Run : docker run -p 8000:8000 -e GROUNDNUT_API_KEYS=your-key groundnut-ai-backend
+# Build context is the REPOSITORY ROOT (the backend imports the top-level `ml`
+# and `herbicide` packages and reads model weights from `experiments/`).
+#
+#   docker build -f backend/Dockerfile -t groundnut-ai-backend .
+#   docker run -p 8000:8000 -e GROUNDNUT_API_KEYS=your-key groundnut-ai-backend
+#
+# The container mirrors the repo layout (/app/backend, /app/ml, /app/experiments,
+# ...) because the services resolve the project root as `parents[3]` of their
+# own file — flattening backend/ into /app would break every model path.
 # =============================================================================
 
 FROM python:3.11-slim
 
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PIP_NO_CACHE_DIR=1
+
 WORKDIR /app
 
-# System dependencies (needed by opencv-python-headless, pillow, numpy)
-# libgl1 + libxcb1 needed by cv2 (opencv) at runtime
+# System libraries needed by opencv (cv2) at runtime
 RUN apt-get update && apt-get install -y --no-install-recommends \
     gcc \
     g++ \
@@ -19,35 +29,34 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libxcb1 \
     && rm -rf /var/lib/apt/lists/*
 
-# Upgrade pip
-RUN pip install --no-cache-dir --upgrade pip
+RUN pip install --upgrade pip
 
-# Python dependencies
-COPY backend/requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+# CPU-only torch/torchvision FIRST (Render has no GPU). If ultralytics were
+# installed first it would pull the multi-GB CUDA build of torch from PyPI, and
+# the later CPU install would be skipped as "already satisfied".
+RUN pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu
 
-# Add CPU-only torch/torchvision (Render has no GPU)
-RUN pip install --no-cache-dir torch torchvision --index-url https://download.pytorch.org/whl/cpu
+COPY backend/requirements.txt /tmp/requirements.txt
+RUN pip install -r /tmp/requirements.txt
 
-# Copy backend source
-COPY backend/app ./app
-COPY backend/run_server.py ./
-
-# Copy ml package (needed by classifier_service.py)
+# Source packages
+COPY backend/app ./backend/app
+COPY backend/run_server.py ./backend/
 COPY ml ./ml
-
-# Copy herbicide package (needed by recommendation_service.py)
 COPY herbicide ./herbicide
+COPY configs ./configs
 
-# Copy model weights (kept small; tracked in git via !*.pt un-ignore)
-COPY *.pt ./
+# Inference weights (only the files whitelisted in .gitignore are in the repo)
+COPY experiments ./experiments
+COPY yolov8n.pt yolov8n-seg.pt ./
 
-# Port Render injects via $PORT
-ENV PORT=8000
-ENV GROUNDNUT_PRELOAD_MODELS=1
-ENV GROUNDNUT_DISABLE_DOCS=0
+WORKDIR /app/backend
 
-EXPOSE $PORT
+# Render injects $PORT; run_server.py reads PORT and GROUNDNUT_API_KEYS from env.
+ENV PORT=8000 \
+    GROUNDNUT_PRELOAD_MODELS=1 \
+    GROUNDNUT_DISABLE_DOCS=0
 
-# Production entrypoint: read API key + port from environment
-CMD sh -c "python run_server.py \"${GROUNDNUT_API_KEY:-dev-local-key}\" \"${PORT:-8000}\""
+EXPOSE 8000
+
+CMD ["python", "run_server.py"]

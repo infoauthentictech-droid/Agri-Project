@@ -1,0 +1,27 @@
+# Allow-list: send only what the backend image needs (the repo root also holds
+# datasets, training runs and an 8 GB experiments/ folder).
+*
+
+!backend/app/
+!backend/run_server.py
+!backend/requirements.txt
+!ml/
+!herbicide/
+!configs/
+!yolov8n.pt
+!yolov8n-seg.pt
+
+!experiments/yolo/agri_yolov8n/weights/best.pt
+!experiments/yoloseg/agri_yolov8n_seg/weights/best.pt
+!experiments/by_dataset/hybrid/plant_gate/plant_gate_model.joblib
+!experiments/by_dataset/hybrid/plant_gate/plant_gate_model.json
+!experiments/classification/cnn/best_model.pth
+!experiments/classification/cnn/results.json
+!experiments/classification/mobilenet/best_model.pth
+!experiments/classification/mobilenet/results.json
+!experiments/classification/efficientnet/best_model.pth
+!experiments/classification/efficientnet/results.json
+
+**/__pycache__
+**/*.pyc
+backend/app/utils/model_registry.json

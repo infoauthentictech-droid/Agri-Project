@@ -1,0 +1,25 @@
+# =============================================================================
+# Render Blueprint — Groundnut AI Backend
+# =============================================================================
+# Render reads this file from the repo root. Deploy it from
+# https://dashboard.render.com/blueprints → "New Blueprint Instance" → pick this repo.
+# =============================================================================
+
+services:
+  - type: web
+    name: groundnut-ai-backend
+    runtime: docker
+    plan: free            # 512 MB RAM — see README/deploy notes if the service is OOM-killed
+    region: oregon        # change to your preferred region
+    dockerContext: .                      # repo root: image needs ml/, herbicide/, experiments/
+    dockerfilePath: ./backend/Dockerfile
+    autoDeploy: true
+    healthCheckPath: /healthz
+    envVars:
+      - key: GROUNDNUT_API_KEYS
+        sync: false       # secret: you are prompted for it when creating the Blueprint
+      - key: GROUNDNUT_PRELOAD_MODELS
+        value: "1"
+      - key: GROUNDNUT_DISABLE_DOCS
+        value: "0"
+    # PORT is injected by Render automatically; run_server.py reads it.
